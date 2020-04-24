@@ -50,14 +50,6 @@ GLFWwindow* initGLWindow(GLuint width, GLuint height, const char* title) {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 #ifndef NDEBUG
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
-    GLint flags;
-    glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
-    if (flags & GL_CONTEXT_FLAG_DEBUG_BIT) {
-        glEnable(GL_DEBUG_OUTPUT);
-        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-        glDebugMessageCallback(glDebugOutput, nullptr);
-        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
-    }
 #endif
 
     GLFWwindow* window = glfwCreateWindow(width, height, title, nullptr, nullptr);
@@ -72,5 +64,16 @@ GLFWwindow* initGLWindow(GLuint width, GLuint height, const char* title) {
         glfwTerminate();
         throw std::runtime_error((const char*) glewGetErrorString(err));
     }
+#ifndef NDEBUG
+    // enable GL debug logging
+    GLint flags;
+    glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+    if (flags & GL_CONTEXT_FLAG_DEBUG_BIT) {
+        glEnable(GL_DEBUG_OUTPUT);
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        glDebugMessageCallback(glDebugOutput, nullptr);
+        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+    }
+#endif
     return window;
 }
