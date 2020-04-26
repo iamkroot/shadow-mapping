@@ -84,3 +84,7 @@ void Shader::set(const std::string &name, const glm::mat4x4 &value) const {
 void Shader::setf(const std::string &name, const std::vector<GLfloat> &values) const {
     glProgramUniform4fv(id, getLoc(name), 1, values.data());
 }
+
+void Shader::set(const std::string &name, const glm::vec3 &value) const {
+    glProgramUniform3fv(id, getLoc(name), 1, &value.r);
+}

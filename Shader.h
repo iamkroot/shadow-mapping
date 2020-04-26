@@ -29,6 +29,8 @@ public:
 
     void set(const std::string &name, const std::vector<GLfloat> &values) const;
 
+    void set(const std::string &name, const glm::vec3 &value) const;
+
     void set(const std::string &name, const glm::mat4x4 &value) const;
 
     void setf(const std::string &name, const std::vector<GLfloat> &values) const;
