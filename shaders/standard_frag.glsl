@@ -23,10 +23,18 @@ float ShadowCalculation(vec4 fragPosLightSpace) {
     //Declare a bias to deal with shadow acne
     float bias = 0;
     // Check if face is a front face
-    if(dot(Normal, lightPos) < 0)
+    if(dot(Normal, lightPos) > 0)
     {
         float bias = 0.005*tan(acos(dot(Normal, lightPos))); // cosTheta is dot( n,l ), clamped between 0 and 1
         bias = clamp(bias, 0,0.001);
+    }
+    else
+    {
+        float bias = 0.005*tan(acos(dot(Normal, lightPos))); // cosTheta is dot( n,l ), clamped between 0 and 1
+        if(bias < 0)
+            bias *= -1;
+        bias = clamp(bias, 0,0.001);
+        bias *= -1;
     }
     //Calculating Shadow value
     float shadow = 0.0;
