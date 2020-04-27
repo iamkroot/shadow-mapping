@@ -21,8 +21,13 @@ float ShadowCalculation(vec4 fragPosLightSpace) {
     // get depth of current fragment from light's perspective
     float currentDepth = projCoords.z;
     //Declare a bias to deal with shadow acne
-    float bias = 0.005*tan(acos(dot(Normal, lightPos))); // cosTheta is dot( n,l ), clamped between 0 and 1
-    bias = clamp(bias, 0,0.001);
+    float bias = 0;
+    // Check if face is a front face
+    if(dot(Normal, lightPos) < 0)
+    {
+        float bias = 0.005*tan(acos(dot(Normal, lightPos))); // cosTheta is dot( n,l ), clamped between 0 and 1
+        bias = clamp(bias, 0,0.001);
+    }
     //Check if the object is in shadow or not
     float shadow = currentDepth - bias < closestDepth ? 0.5 : 1.0;
     return shadow;
