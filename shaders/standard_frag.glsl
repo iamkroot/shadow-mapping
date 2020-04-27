@@ -28,8 +28,19 @@ float ShadowCalculation(vec4 fragPosLightSpace) {
         float bias = 0.005*tan(acos(dot(Normal, lightPos))); // cosTheta is dot( n,l ), clamped between 0 and 1
         bias = clamp(bias, 0,0.001);
     }
-    //Check if the object is in shadow or not
-    float shadow = currentDepth - bias < closestDepth ? 0.5 : 1.0;
+    //Calculating Shadow value
+    float shadow = 0.0;
+    //Applying PCF with the 9 nearest points
+    vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
+    for(int x = -1; x <= 1; ++x)
+    {
+        for(int y = -1; y <= 1; ++y)
+        {
+            float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r; 
+            shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.15;        
+        }    
+    }
+    shadow /= 9.0;
     return shadow;
 }
 
