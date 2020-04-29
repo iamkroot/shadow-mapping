@@ -79,9 +79,7 @@ int main() {
         glViewport(0, 0, SHADOW_RES, SHADOW_RES);
         glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
         glClear(GL_DEPTH_BUFFER_BIT); // only drawing depth map
-        glCullFace(GL_FRONT);
         room.draw();
-        glCullFace(GL_BACK);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         // PASS 2: Full render with shadow
@@ -127,6 +125,8 @@ void glfw_key_callback(GLFWwindow* window, int key, int scancode, int action, in
         camera.translate(Camera::Direction::DOWN);
     } else if (key == GLFW_KEY_R and action == GLFW_PRESS) {
         camera.reset();
+    } else if (key == GLFW_KEY_Q and action == GLFW_PRESS) {
+        glfwSetWindowShouldClose(window, GL_TRUE);
     }
 }
 
