@@ -36,9 +36,7 @@ int main() {
                    {1,  1,  1}};
     Shader shader("shaders/standard_vert.glsl", "shaders/standard_frag.glsl");
     Shader depthShader("shaders/depth_vert.glsl", "shaders/depth_frag.glsl");
-    auto sphere = ObjModel("models/sphere.obj");
     auto room = ObjModel("models/room.obj");
-    auto cube = ObjModel("models/cube.obj");
 
     unsigned int depthMapFBO;
     glGenFramebuffers(1, &depthMapFBO);
