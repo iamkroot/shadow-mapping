@@ -4,23 +4,36 @@
 #include "Shader.h"
 #include <glm/gtc/matrix_transform.hpp>
 
-struct Light
-{
+struct Light {
     glm::vec3 position;
     glm::vec3 color;
 };
 
-int main()
-{
+Camera camera({10, 10, -5}, {0, 0, 0});
+
+void glfw_key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+
+void glfw_mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
+
+void glfw_cursor_position_callback(GLFWwindow* window, double xPos, double yPos);
+
+void glfw_scroll_callback(GLFWwindow* window, double xOffset, double yOffset);
+
+int main() {
     unsigned int windowWidth = 800, windowHeight = 600;
-    float aspect = (float)windowWidth / (float)windowHeight;
+    float aspect = (float) windowWidth / (float) windowHeight;
     auto window = initGLWindow(windowWidth, windowHeight, "shadows");
+
+    glfwSetKeyCallback(window, glfw_key_callback);
+    glfwSetMouseButtonCallback(window, glfw_mouse_button_callback);
+    glfwSetCursorPosCallback(window, glfw_cursor_position_callback);
+    glfwSetScrollCallback(window, glfw_scroll_callback);
     glEnable(GL_DEPTH_TEST); // enable depth-testing
     glDepthFunc(GL_LESS);
     glEnable(GL_CULL_FACE);
+
     Light light = {{10, 15, 15},
-                   {1, 1, 1}};
-    Camera camera({10, 10, 5}, {0, 0, 0});
+                   {1,  1,  1}};
     Shader shader("shaders/standard_vert.glsl", "shaders/standard_frag.glsl");
     Shader depthShader("shaders/depth_vert.glsl", "shaders/depth_frag.glsl");
     auto sphere = ObjModel("models/sphere.obj");
@@ -35,7 +48,8 @@ int main()
     unsigned int depthMap;
     glGenTextures(1, &depthMap);
     glBindTexture(GL_TEXTURE_2D, depthMap);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_RES, SHADOW_RES, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_RES, SHADOW_RES, 0, GL_DEPTH_COMPONENT, GL_FLOAT,
+                 NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -51,8 +65,7 @@ int main()
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
-    while (!glfwWindowShouldClose(window))
-    {
+    while (!glfwWindowShouldClose(window)) {
         auto model = glm::mat4(1.0f);
         float near_plane = 1.f, far_plane = 100.f;
         // PASS 1: Light view - generate depth map
@@ -94,4 +107,46 @@ int main()
     }
     glfwTerminate();
     return 0;
+}
+
+bool isDragging = false;
+double dragX = -1, dragY = -1;
+
+void glfw_key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    if (key == GLFW_KEY_W and action == GLFW_PRESS) {
+        camera.translate(Camera::Direction::FORWARD);
+    } else if (key == GLFW_KEY_S and action == GLFW_PRESS) {
+        camera.translate(Camera::Direction::BACKWARD);
+    } else if (key == GLFW_KEY_A and action == GLFW_PRESS) {
+        camera.translate(Camera::Direction::LEFT);
+    } else if (key == GLFW_KEY_D and action == GLFW_PRESS) {
+        camera.translate(Camera::Direction::RIGHT);
+    } else if (key == GLFW_KEY_UP and action == GLFW_PRESS) {
+        camera.translate(Camera::Direction::UP);
+    } else if (key == GLFW_KEY_DOWN and action == GLFW_PRESS) {
+        camera.translate(Camera::Direction::DOWN);
+    } else if (key == GLFW_KEY_R and action == GLFW_PRESS) {
+        camera.reset();
+    }
+}
+
+void glfw_mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
+    if (button == GLFW_MOUSE_BUTTON_LEFT) {
+        isDragging = action == GLFW_PRESS;
+        if (not isDragging)
+            dragX = dragY = -1;
+    }
+}
+
+void glfw_cursor_position_callback(GLFWwindow* window, double xPos, double yPos) {
+    if (isDragging) {
+        if (dragX != -1 and dragY != -1)
+            camera.rotate(xPos - dragX, yPos - dragY);
+        dragX = xPos;
+        dragY = yPos;
+    }
+}
+
+void glfw_scroll_callback(GLFWwindow* window, double xOffset, double yOffset) {
+    camera.zoom(yOffset);
 }

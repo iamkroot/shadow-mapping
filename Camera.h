@@ -10,7 +10,7 @@ class Camera {
     GLfloat initPitch;
     GLfloat translationSensitivity = 1;
     GLfloat rotationSensitivity = 0.2;
-    GLfloat zoomSensitivity = 0.1;
+    GLfloat zoomSensitivity = 0.001;
     GLfloat zoomFactor = 1;
     glm::vec3 position;
     glm::vec3 initPosition;
