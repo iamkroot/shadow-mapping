@@ -22,7 +22,7 @@ void glfw_scroll_callback(GLFWwindow* window, double xOffset, double yOffset);
 int main() {
     unsigned int windowWidth = 800, windowHeight = 600;
     float aspect = (float) windowWidth / (float) windowHeight;
-    auto window = initGLWindow(windowWidth, windowHeight, "shadows");
+    auto* window = initGLWindow(windowWidth, windowHeight, "shadows");
 
     glfwSetKeyCallback(window, glfw_key_callback);
     glfwSetMouseButtonCallback(window, glfw_mouse_button_callback);
@@ -36,14 +36,15 @@ int main() {
                    {1,  1,  1}};
     Shader shader("shaders/standard_vert.glsl", "shaders/standard_frag.glsl");
     Shader depthShader("shaders/depth_vert.glsl", "shaders/depth_frag.glsl");
+    Shader minimapShader("shaders/standard_vert.glsl", "shaders/minimap_depth_frag.glsl");
     auto room = ObjModel("models/room.obj");
 
-    unsigned int depthMapFBO;
+    unsigned int depthMapFBO = 0;
     glGenFramebuffers(1, &depthMapFBO);
 
     const unsigned int SHADOW_RES = 1024;
 
-    unsigned int depthMap;
+    unsigned int depthMap = 0;
     glGenTextures(1, &depthMap);
     glBindTexture(GL_TEXTURE_2D, depthMap);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_RES, SHADOW_RES, 0, GL_DEPTH_COMPONENT, GL_FLOAT,
@@ -61,9 +62,9 @@ int main() {
 
     shader.set("shadowMap", 0);
 
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-
     while (!glfwWindowShouldClose(window)) {
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+
         auto model = glm::mat4(1.0f);
         float near_plane = 1.f, far_plane = 100.f;
         // PASS 1: Light view - generate depth map
@@ -96,6 +97,24 @@ int main() {
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, depthMap);
+        room.draw();
+
+        // Draw minimap with depth values
+        auto minimapWidth = windowWidth / 4, minimapHeight = windowHeight / 4;
+        glViewport(0, 0, minimapWidth, minimapHeight);
+        glEnable(GL_SCISSOR_TEST);
+        glScissor(0, 0, minimapWidth, minimapHeight);
+        glClearColor(0.f, 0.f, 0.f, 0.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glDisable(GL_SCISSOR_TEST);
+
+        minimapShader.set("lightSpace", lightSpace);
+        minimapShader.set("projection", proj);
+        minimapShader.set("view", view);
+        minimapShader.set("model", model);
+        minimapShader.set("near_plane", near_plane);
+        minimapShader.set("far_plane", far_plane);
+        minimapShader.use();
         room.draw();
 
         glfwSwapBuffers(window);
