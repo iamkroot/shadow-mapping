@@ -7,6 +7,7 @@
 struct Light {
     glm::vec3 position;
     glm::vec3 color;
+    glm::mat4 lightSpace;
 };
 
 Camera camera({10, 10, -5}, {0, 0, 0});
@@ -33,8 +34,11 @@ int main() {
     glDepthFunc(GL_LESS);
     glEnable(GL_CULL_FACE);
 
-    Light light = {{10, 15, 15},
-                   {1,  1,  1}};
+    std::vector<Light> lights = {
+            {{10,  15, 15},  {0, 0, 1}},
+            {{-10, 15, -15}, {1, 0, 0}},
+    };
+
     Shader shader("shaders/standard_vert.glsl", "shaders/standard_frag.glsl");
     Shader depthShader("shaders/depth_vert.glsl", "shaders/depth_frag.glsl");
     Shader minimapShader("shaders/standard_vert.glsl", "shaders/minimap_depth_frag.glsl");
@@ -45,80 +49,92 @@ int main() {
 
     const unsigned int SHADOW_RES = 1024;
 
-    unsigned int depthMap = 0;
-    glGenTextures(1, &depthMap);
-    glBindTexture(GL_TEXTURE_2D, depthMap);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_RES, SHADOW_RES, 0, GL_DEPTH_COMPONENT, GL_FLOAT,
-                 NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    unsigned int depthMaps[lights.size()];
+    glGenTextures(lights.size(), depthMaps);
+    for (int i = 0; i < lights.size(); ++i) {
+        glBindTexture(GL_TEXTURE_2D, depthMaps[i]);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_RES, SHADOW_RES, 0, GL_DEPTH_COMPONENT, GL_FLOAT,
+                     NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    }
 
     glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
     glDrawBuffer(GL_NONE); // don't need color buf for shadows
     glReadBuffer(GL_NONE);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    shader.set("shadowMap", 0);
+    shader.set("numLights", (int) lights.size());
 
     while (!glfwWindowShouldClose(window)) {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
         auto model = glm::mat4(1.0f);
         float near_plane = 1.f, far_plane = 100.f;
-        // PASS 1: Light view - generate depth map
-        auto lightProj = glm::perspective(30.f, aspect, near_plane, far_plane);
-        auto lightView = glm::lookAt(light.position, {0, 0, 0}, {0, 1, 0});
-        auto lightSpace = lightProj * lightView;
-        depthShader.use();
-        depthShader.set("model", model);
-        depthShader.set("lightSpace", lightSpace);
 
-        glViewport(0, 0, SHADOW_RES, SHADOW_RES);
-        glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-        glClear(GL_DEPTH_BUFFER_BIT); // only drawing depth map
-        room.draw();
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        // PASS 1: Light view - generate depth maps for each light
+        for (int i = 0; i < lights.size(); ++i) {
+            auto* light = &lights[i];
+            auto lightProj = glm::perspective(30.f, aspect, near_plane, far_plane);
+            auto lightView = glm::lookAt(light->position, {0, 0, 0}, {0, 1, 0});
+            light->lightSpace = lightProj * lightView;
+            depthShader.use();
+            depthShader.set("model", model);
+            depthShader.set("lightSpace", light->lightSpace);
+
+            glViewport(0, 0, SHADOW_RES, SHADOW_RES);
+            glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMaps[i], 0);
+            glClear(GL_DEPTH_BUFFER_BIT); // only drawing depth map
+            room.draw();
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        }
 
         // PASS 2: Full render with shadow
         glViewport(0, 0, windowWidth, windowHeight);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         shader.use();
-        shader.set("lightPos", light.position);
-        shader.set("lightColor", light.color);
-        shader.set("lightSpace", lightSpace);
         auto proj = glm::perspective(45.f * camera.getZoom(), aspect, near_plane, far_plane);
         auto view = camera.lookAt();
         shader.set("projection", proj);
         shader.set("view", view);
         shader.set("model", model);
+        for (int i = 0; i < lights.size(); ++i) {
+            auto* light = &lights[i];
+            const std::string prefix = "lights[" + std::to_string(i) + "].";
+            shader.set(prefix + "lightPos", light->position);
+            shader.set(prefix + "lightColor", light->color);
+            shader.set(prefix + "lightSpace", light->lightSpace);
+            shader.set(prefix + "shadowMap", i);
+            glActiveTexture(GL_TEXTURE0 + i);
+            glBindTexture(GL_TEXTURE_2D, depthMaps[i]);
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, depthMap);
+        }
         room.draw();
 
-        if (drawMinimap) {
-            // Draw minimap with depth values
-            auto minimapWidth = windowWidth / 4, minimapHeight = windowHeight / 4;
-            glViewport(0, 0, minimapWidth, minimapHeight);
-            glEnable(GL_SCISSOR_TEST);
-            glScissor(0, 0, minimapWidth, minimapHeight);
-            glClearColor(0.f, 0.f, 0.f, 0.0f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            glDisable(GL_SCISSOR_TEST);
 
-            minimapShader.set("lightSpace", lightSpace);
-            minimapShader.set("projection", proj);
-            minimapShader.set("view", view);
-            minimapShader.set("model", model);
-            minimapShader.set("near_plane", near_plane);
-            minimapShader.set("far_plane", far_plane);
-            minimapShader.use();
-            room.draw();
-        }
+//        if (drawMinimap) {
+//            // Draw minimap with depth values
+//            auto minimapWidth = windowWidth / 4, minimapHeight = windowHeight / 4;
+//            glViewport(0, 0, minimapWidth, minimapHeight);
+//            glEnable(GL_SCISSOR_TEST);
+//            glScissor(0, 0, minimapWidth, minimapHeight);
+//            glClearColor(0.f, 0.f, 0.f, 0.0f);
+//            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//            glDisable(GL_SCISSOR_TEST);
+//
+//            minimapShader.set("lightSpace", light.lightSpace);
+//            minimapShader.set("projection", proj);
+//            minimapShader.set("view", view);
+//            minimapShader.set("model", model);
+//            minimapShader.set("near_plane", near_plane);
+//            minimapShader.set("far_plane", far_plane);
+//            minimapShader.use();
+//            room.draw();
+//        }
 
         glfwSwapBuffers(window);
         glfwPollEvents();

@@ -3,11 +3,16 @@ out vec4 FragColor;
 
 in vec3 Normal;
 in vec3 FragPos;
-in vec4 FragPosLightSpace;
+//in vec4 FragPosLightSpace;
 
-uniform sampler2D shadowMap;
-uniform vec3 lightPos;
-uniform vec3 lightColor;
+struct Light {
+    vec3 lightPos;
+    vec3 lightColor;
+    mat4 lightSpace;
+    sampler2D shadowMap;
+};
+uniform int numLights;
+uniform Light lights[4];
 
 vec2 poissonDisk[16] = vec2[](
 vec2(-0.94201624, -0.39906216),
@@ -28,9 +33,10 @@ vec2(0.19984126, 0.78641367),
 vec2(0.14383161, -0.14100790)
 );
 
-float getVisibility(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir) {
+float getVisibility(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir, sampler2D shadowMap) {
     // perform perspective divide
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    FragColor = vec4(vec3(fragPosLightSpace.z), 1);
 
     // normalize to [0,1] range
     // full formula: (((far-near) * coord) + near + far) / 2.0
@@ -58,12 +64,17 @@ float getVisibility(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir) {
 }
 
 void main() {
-    vec3 ambient = 0.3 * lightColor;
     vec3 norm = normalize(Normal);
-    vec3 lightDir = normalize(lightPos - FragPos);
-    float diff = max(dot(norm, lightDir), 0.0);
-    vec3 diffuse = 0.8 * diff * lightColor;
+    vec3 color = vec3(0);
+    for (int i=0;i<numLights;i++) {
+        vec3 ambient = 0.3 * lights[i].lightColor;
+        vec3 lightDir = normalize(lights[i].lightPos - FragPos);
+        float diff = max(dot(norm, lightDir), 0.0);
+        vec3 diffuse = 0.8 * diff * lights[i].lightColor;
+        vec4 fragPosLightSpace = lights[i].lightSpace * vec4(FragPos, 1);
+        float visibility = getVisibility(fragPosLightSpace, norm, lightDir, lights[i].shadowMap);
+        color += (ambient + visibility * diffuse) / numLights;
+    }
 
-    float visibility = getVisibility(FragPosLightSpace, norm, lightDir);
-    FragColor = vec4(ambient + visibility * diffuse, 1);
+    FragColor = vec4(color, 1);
 }
