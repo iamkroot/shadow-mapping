@@ -72,7 +72,7 @@ int main() {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
         auto model = glm::mat4(1.0f);
-        float near_plane = 1.f, far_plane = 100.f;
+        float near_plane = 1.f, far_plane = 35.f;
 
         // PASS 1: Light view - generate depth maps for each light
         for (int i = 0; i < lights.size(); ++i) {
