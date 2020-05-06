@@ -2,8 +2,7 @@
 out vec4 FragColor;
 
 in vec3 Normal;
-in vec3 FragPos;
-//in vec4 FragPosLightSpace;
+in vec4 FragPos;
 
 struct Light {
     vec3 lightPos;
@@ -68,10 +67,10 @@ void main() {
     vec3 color = vec3(0);
     for (int i=0;i<numLights;i++) {
         vec3 ambient = 0.3 * lights[i].lightColor;
-        vec3 lightDir = normalize(lights[i].lightPos - FragPos);
+        vec3 lightDir = normalize(lights[i].lightPos - FragPos.xyz);
         float diff = max(dot(norm, lightDir), 0.0);
         vec3 diffuse = 0.8 * diff * lights[i].lightColor;
-        vec4 fragPosLightSpace = lights[i].lightSpace * vec4(FragPos, 1);
+        vec4 fragPosLightSpace = lights[i].lightSpace * FragPos;
         float visibility = getVisibility(fragPosLightSpace, norm, lightDir, lights[i].shadowMap);
         color += (ambient + visibility * diffuse) / numLights;
     }

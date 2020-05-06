@@ -115,26 +115,26 @@ int main() {
         }
         room.draw();
 
-
-//        if (drawMinimap) {
-//            // Draw minimap with depth values
-//            auto minimapWidth = windowWidth / 4, minimapHeight = windowHeight / 4;
-//            glViewport(0, 0, minimapWidth, minimapHeight);
-//            glEnable(GL_SCISSOR_TEST);
-//            glScissor(0, 0, minimapWidth, minimapHeight);
-//            glClearColor(0.f, 0.f, 0.f, 0.0f);
-//            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//            glDisable(GL_SCISSOR_TEST);
-//
-//            minimapShader.set("lightSpace", light.lightSpace);
-//            minimapShader.set("projection", proj);
-//            minimapShader.set("view", view);
-//            minimapShader.set("model", model);
-//            minimapShader.set("near_plane", near_plane);
-//            minimapShader.set("far_plane", far_plane);
-//            minimapShader.use();
-//            room.draw();
-//        }
+        // Draw minimaps with z-values for each light
+        if (drawMinimap) {
+            minimapShader.set("projection", proj);
+            minimapShader.set("view", view);
+            minimapShader.set("model", model);
+            minimapShader.set("near_plane", near_plane);
+            minimapShader.set("far_plane", far_plane);
+            minimapShader.use();
+            auto minimapWidth = windowWidth / 4, minimapHeight = windowHeight / 4;
+            glEnable(GL_SCISSOR_TEST);
+            for (int i = 0; i < lights.size(); ++i) {
+                glViewport(i * minimapWidth, 0, minimapWidth, minimapHeight);
+                glScissor(i * minimapWidth, 0, minimapWidth, minimapHeight);
+                glClearColor(0.f, 0.f, 0.f, 0.0f);
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                minimapShader.set("lightSpace", lights[i].lightSpace);
+                room.draw();
+            }
+            glDisable(GL_SCISSOR_TEST);
+        }
 
         glfwSwapBuffers(window);
         glfwPollEvents();
