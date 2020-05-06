@@ -68,6 +68,6 @@ void Camera::zoom(int y) {
     zoomFactor = std::min(zoomFactor, 20.f);
 }
 
-GLfloat Camera::getZoom() {
+GLfloat Camera::getZoom() const {
     return zoomFactor;
 }

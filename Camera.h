@@ -69,7 +69,7 @@ public:
     /**
      * @brief Get the zoom factor of the camera, to be used for gluPerspective
      */
-    GLfloat getZoom();
+    [[nodiscard]] GLfloat getZoom() const;
 };
 
 #endif //CAMERA_H
