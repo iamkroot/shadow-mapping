@@ -24,6 +24,7 @@ Implements a two pass rendering algorithm, as described in "Casting Curved Shado
 * Scroll mouse to zoom
 * Press `r` to reset the camera
 * `q` to quit
+* `m` to toggle depth minimap
 
 ## References
 1. [Casting Curved Shadows on Curved Surfaces](https://dl.acm.org/doi/10.1145/280811.280975), Williams, 1978

@@ -10,6 +10,7 @@ struct Light {
 };
 
 Camera camera({10, 10, -5}, {0, 0, 0});
+bool drawMinimap = true;
 
 void glfw_key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
@@ -99,23 +100,25 @@ int main() {
         glBindTexture(GL_TEXTURE_2D, depthMap);
         room.draw();
 
-        // Draw minimap with depth values
-        auto minimapWidth = windowWidth / 4, minimapHeight = windowHeight / 4;
-        glViewport(0, 0, minimapWidth, minimapHeight);
-        glEnable(GL_SCISSOR_TEST);
-        glScissor(0, 0, minimapWidth, minimapHeight);
-        glClearColor(0.f, 0.f, 0.f, 0.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glDisable(GL_SCISSOR_TEST);
+        if (drawMinimap) {
+            // Draw minimap with depth values
+            auto minimapWidth = windowWidth / 4, minimapHeight = windowHeight / 4;
+            glViewport(0, 0, minimapWidth, minimapHeight);
+            glEnable(GL_SCISSOR_TEST);
+            glScissor(0, 0, minimapWidth, minimapHeight);
+            glClearColor(0.f, 0.f, 0.f, 0.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glDisable(GL_SCISSOR_TEST);
 
-        minimapShader.set("lightSpace", lightSpace);
-        minimapShader.set("projection", proj);
-        minimapShader.set("view", view);
-        minimapShader.set("model", model);
-        minimapShader.set("near_plane", near_plane);
-        minimapShader.set("far_plane", far_plane);
-        minimapShader.use();
-        room.draw();
+            minimapShader.set("lightSpace", lightSpace);
+            minimapShader.set("projection", proj);
+            minimapShader.set("view", view);
+            minimapShader.set("model", model);
+            minimapShader.set("near_plane", near_plane);
+            minimapShader.set("far_plane", far_plane);
+            minimapShader.use();
+            room.draw();
+        }
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -144,6 +147,8 @@ void glfw_key_callback(GLFWwindow* window, int key, int scancode, int action, in
         camera.reset();
     } else if (key == GLFW_KEY_Q and action == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, GL_TRUE);
+    } else if (key == GLFW_KEY_M and action == GLFW_PRESS) {
+        drawMinimap = not drawMinimap;
     }
 }
 
