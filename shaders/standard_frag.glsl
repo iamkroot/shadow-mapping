@@ -9,6 +9,7 @@ struct Light {
     vec3 lightColor;
     mat4 lightSpace;
     sampler2D shadowMap;
+    bool enabled;
 };
 uniform int numLights;
 uniform Light lights[4];
@@ -65,15 +66,20 @@ float getVisibility(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir, sampler2
 void main() {
     vec3 norm = normalize(Normal);
     vec3 color = vec3(0);
+    int total_enabled = 0;
     for (int i=0;i<numLights;i++) {
+        if (!lights[i].enabled) {
+            continue;
+        }
+        total_enabled++;
         vec3 ambient = 0.3 * lights[i].lightColor;
         vec3 lightDir = normalize(lights[i].lightPos - FragPos.xyz);
         float diff = max(dot(norm, lightDir), 0.0);
         vec3 diffuse = 0.8 * diff * lights[i].lightColor;
         vec4 fragPosLightSpace = lights[i].lightSpace * FragPos;
         float visibility = getVisibility(fragPosLightSpace, norm, lightDir, lights[i].shadowMap);
-        color += (ambient + visibility * diffuse) / numLights;
+        color += (ambient + visibility * diffuse);
     }
-
+    color /= total_enabled;
     FragColor = vec4(color, 1);
 }

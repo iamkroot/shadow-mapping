@@ -5,7 +5,12 @@
 #include "Light.h"
 
 Camera camera({10, 10, -5}, {0, 0, 0});
-bool drawMinimap = true;
+std::vector<Light> lights = {
+        {{10,  15, 15},  {0, 0, 1}},
+        {{-10, 15, -15}, {1, 0, 0}},
+};
+
+bool drawMinimaps = true;
 
 void glfw_key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
@@ -27,11 +32,6 @@ int main() {
     glEnable(GL_DEPTH_TEST); // enable depth-testing
     glDepthFunc(GL_LESS);
     glEnable(GL_CULL_FACE);
-
-    std::vector<Light> lights = {
-            {{10,  15, 15},  {0, 0, 1}},
-            {{-10, 15, -15}, {1, 0, 0}},
-    };
 
     Shader shader("shaders/standard_vert.glsl", "shaders/standard_frag.glsl");
     Shader depthShader("shaders/depth_vert.glsl", "shaders/depth_frag.glsl");
@@ -63,6 +63,8 @@ int main() {
 
         // PASS 1: Light view - generate depth maps for each light
         for (auto &light : lights) {
+            if (not light.isEnabled)
+                continue;
             auto lightProj = glm::perspective(30.f, aspect, near_plane, far_plane);
             auto lightView = light.lookAt();
             light.proj_view = lightProj * lightView;
@@ -93,6 +95,10 @@ int main() {
         for (int i = 0; i < lights.size(); ++i) {
             auto light = lights[i];
             const std::string prefix = "lights[" + std::to_string(i) + "].";
+            shader.set(prefix + "enabled", light.isEnabled);
+            if (not light.isEnabled) {
+                continue;
+            }
             shader.set(prefix + "lightPos", light.getPosition());
             shader.set(prefix + "lightColor", light.getColor());
             shader.set(prefix + "lightSpace", light.proj_view);
@@ -109,7 +115,7 @@ int main() {
         room.draw();
 
         // Draw minimaps with z-values for each light
-        if (drawMinimap) {
+        if (drawMinimaps) {
             minimapShader.set("projection", proj);
             minimapShader.set("view", view);
             minimapShader.set("model", model);
@@ -119,6 +125,8 @@ int main() {
             auto minimapWidth = windowWidth / 4, minimapHeight = windowHeight / 4;
             glEnable(GL_SCISSOR_TEST);
             for (int i = 0; i < lights.size(); ++i) {
+                if (not lights[i].isEnabled)
+                    continue;
                 glViewport(i * minimapWidth, 0, minimapWidth, minimapHeight);
                 glScissor(i * minimapWidth, 0, minimapWidth, minimapHeight);
                 glClearColor(0.f, 0.f, 0.f, 0.0f);
@@ -157,7 +165,14 @@ void glfw_key_callback(GLFWwindow* window, int key, int scancode, int action, in
     } else if (key == GLFW_KEY_Q and action == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, GL_TRUE);
     } else if (key == GLFW_KEY_M and action == GLFW_PRESS) {
-        drawMinimap = not drawMinimap;
+        drawMinimaps = not drawMinimaps;
+    } else {  // toggle lights using number keys
+        for (int i = 0; i < lights.size(); ++i) {
+            if (key == GLFW_KEY_1 + i and action == GLFW_PRESS) {
+                lights[i].isEnabled = not lights[i].isEnabled;
+                break;
+            }
+        }
     }
 }
 

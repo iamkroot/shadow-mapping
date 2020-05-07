@@ -5,7 +5,8 @@ Light::Light(const glm::vec3 &position, const glm::vec3 &color, const glm::vec3 
         color(color),
         target(target),
         model(glm::translate(glm::mat4(1), position)),
-        proj_view(glm::mat4(1)) {}
+        proj_view(glm::mat4(1)),
+        isEnabled(true) {}
 
 glm::mat4 Light::lookAt() const {
     return glm::lookAt(position, target, {0, 1, 0});

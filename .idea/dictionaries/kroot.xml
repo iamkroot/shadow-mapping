@@ -4,6 +4,7 @@
       <w>glfw</w>
       <w>glsl</w>
       <w>minimap</w>
+      <w>minimaps</w>
       <w>scancode</w>
       <w>shaders</w>
       <w>vert</w>

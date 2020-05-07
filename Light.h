@@ -12,6 +12,7 @@ class Light {
     glm::mat4 model;
 
 public:
+    bool isEnabled;
     glm::mat4 proj_view;
 
     Light(const glm::vec3 &position, const glm::vec3 &color, const glm::vec3 &target = {0, 0, 0});
