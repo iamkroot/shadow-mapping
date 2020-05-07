@@ -4,7 +4,7 @@ find_package(PkgConfig REQUIRED)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(shadows main.cpp common.h GLUtils.cpp GLUtils.h Shader.cpp Shader.h ObjModel.cpp ObjModel.h Camera.cpp Camera.h)
+add_executable(shadows main.cpp common.h GLUtils.cpp GLUtils.h Shader.cpp Shader.h ObjModel.cpp ObjModel.h Camera.cpp Camera.h Light.cpp Light.h)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 find_package(OpenGL REQUIRED)
