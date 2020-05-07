@@ -42,7 +42,9 @@ int main() {
     Shader shader("shaders/standard_vert.glsl", "shaders/standard_frag.glsl");
     Shader depthShader("shaders/depth_vert.glsl", "shaders/depth_frag.glsl");
     Shader minimapShader("shaders/standard_vert.glsl", "shaders/minimap_depth_frag.glsl");
+    Shader lightShader("shaders/standard_vert.glsl", "shaders/light_frag.glsl");
     auto room = ObjModel("models/room.obj");
+    auto cube = ObjModel("models/cube.obj");
 
     unsigned int depthMapFBO = 0;
     glGenFramebuffers(1, &depthMapFBO);
@@ -96,12 +98,14 @@ int main() {
         glViewport(0, 0, windowWidth, windowHeight);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        shader.use();
         auto proj = glm::perspective(45.f * camera.getZoom(), aspect, near_plane, far_plane);
         auto view = camera.lookAt();
         shader.set("projection", proj);
         shader.set("view", view);
         shader.set("model", model);
+        lightShader.set("projection", proj);
+        lightShader.set("view", view);
+        lightShader.use();
         for (int i = 0; i < lights.size(); ++i) {
             auto* light = &lights[i];
             const std::string prefix = "lights[" + std::to_string(i) + "].";
@@ -109,10 +113,15 @@ int main() {
             shader.set(prefix + "lightColor", light->color);
             shader.set(prefix + "lightSpace", light->lightSpace);
             shader.set(prefix + "shadowMap", i);
+            auto lightModel = glm::translate(model, light->position);
+            lightModel = glm::scale(lightModel, {0.5, 0.5, 0.5});
+            lightShader.set("model", lightModel);
+            lightShader.set("lightColor", light->color);
+            cube.draw();
             glActiveTexture(GL_TEXTURE0 + i);
             glBindTexture(GL_TEXTURE_2D, depthMaps[i]);
-
         }
+        shader.use();
         room.draw();
 
         // Draw minimaps with z-values for each light
