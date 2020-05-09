@@ -6,8 +6,7 @@
 /**
  * @brief Class to represent the Camera
  */
-class Camera
-{
+class Camera {
     GLfloat yaw;
     GLfloat pitch;
     GLfloat initYaw;
@@ -29,8 +28,7 @@ public:
     /**
      * @brief Simple enum to define a direction of movement
      */
-    enum class Direction
-    {
+    enum class Direction {
         FORWARD,
         BACKWARD,
         LEFT,

@@ -8,8 +8,7 @@
 /**
  * @brief The class to represent the Shader information
  */
-class Shader
-{
+class Shader {
     /**
      * @brief Method to read the shader file
      * @param path The path to the shader
