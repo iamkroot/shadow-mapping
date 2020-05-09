@@ -1,0 +1,1 @@
+/usr/bin/g++-9  -g   CMakeFiles/shadows.dir/main.cpp.o CMakeFiles/shadows.dir/GLUtils.cpp.o CMakeFiles/shadows.dir/Shader.cpp.o CMakeFiles/shadows.dir/ObjModel.cpp.o CMakeFiles/shadows.dir/Camera.cpp.o CMakeFiles/shadows.dir/Light.cpp.o  -o shadows  /usr/lib/x86_64-linux-gnu/libOpenGL.so -lglfw /usr/lib/x86_64-linux-gnu/libGLEW.so -lassimp 

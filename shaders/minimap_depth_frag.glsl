@@ -1,11 +1,11 @@
 #version 330 core
-out vec4 FragColor;
+out vec4 FragColor; // Fragment color
 
-in vec4 FragPos;
+in vec4 FragPos; // Fragment position
 
-uniform mat4 lightSpace;
-uniform float near_plane;
-uniform float far_plane;
+uniform mat4 lightSpace; // lightspace transform
+uniform float near_plane; // near clipping plane z value
+uniform float far_plane; // far clipping plane z value
 
 void main() {
     vec4 fragPosLightSpace = lightSpace * FragPos;

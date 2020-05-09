@@ -1,0 +1,3 @@
+/home/kunal/Documents/shadows/build/CMakeFiles/rebuild_cache.dir
+/home/kunal/Documents/shadows/build/CMakeFiles/edit_cache.dir
+/home/kunal/Documents/shadows/build/CMakeFiles/shadows.dir

@@ -1,0 +1,32 @@
+[
+{
+  "directory": "/home/kunal/Documents/shadows/build",
+  "command": "/usr/bin/g++-9   -I/home/kunal/Documents/shadows/shadows -I/home/kunal/Documents/shadows/GLM_INCLUDE_DIR -I/home/kunal/Documents/shadows/ASSIMP_INCLUDE_DIRS  -g   -std=gnu++2a -o CMakeFiles/shadows.dir/main.cpp.o -c /home/kunal/Documents/shadows/main.cpp",
+  "file": "/home/kunal/Documents/shadows/main.cpp"
+},
+{
+  "directory": "/home/kunal/Documents/shadows/build",
+  "command": "/usr/bin/g++-9   -I/home/kunal/Documents/shadows/shadows -I/home/kunal/Documents/shadows/GLM_INCLUDE_DIR -I/home/kunal/Documents/shadows/ASSIMP_INCLUDE_DIRS  -g   -std=gnu++2a -o CMakeFiles/shadows.dir/GLUtils.cpp.o -c /home/kunal/Documents/shadows/GLUtils.cpp",
+  "file": "/home/kunal/Documents/shadows/GLUtils.cpp"
+},
+{
+  "directory": "/home/kunal/Documents/shadows/build",
+  "command": "/usr/bin/g++-9   -I/home/kunal/Documents/shadows/shadows -I/home/kunal/Documents/shadows/GLM_INCLUDE_DIR -I/home/kunal/Documents/shadows/ASSIMP_INCLUDE_DIRS  -g   -std=gnu++2a -o CMakeFiles/shadows.dir/Shader.cpp.o -c /home/kunal/Documents/shadows/Shader.cpp",
+  "file": "/home/kunal/Documents/shadows/Shader.cpp"
+},
+{
+  "directory": "/home/kunal/Documents/shadows/build",
+  "command": "/usr/bin/g++-9   -I/home/kunal/Documents/shadows/shadows -I/home/kunal/Documents/shadows/GLM_INCLUDE_DIR -I/home/kunal/Documents/shadows/ASSIMP_INCLUDE_DIRS  -g   -std=gnu++2a -o CMakeFiles/shadows.dir/ObjModel.cpp.o -c /home/kunal/Documents/shadows/ObjModel.cpp",
+  "file": "/home/kunal/Documents/shadows/ObjModel.cpp"
+},
+{
+  "directory": "/home/kunal/Documents/shadows/build",
+  "command": "/usr/bin/g++-9   -I/home/kunal/Documents/shadows/shadows -I/home/kunal/Documents/shadows/GLM_INCLUDE_DIR -I/home/kunal/Documents/shadows/ASSIMP_INCLUDE_DIRS  -g   -std=gnu++2a -o CMakeFiles/shadows.dir/Camera.cpp.o -c /home/kunal/Documents/shadows/Camera.cpp",
+  "file": "/home/kunal/Documents/shadows/Camera.cpp"
+},
+{
+  "directory": "/home/kunal/Documents/shadows/build",
+  "command": "/usr/bin/g++-9   -I/home/kunal/Documents/shadows/shadows -I/home/kunal/Documents/shadows/GLM_INCLUDE_DIR -I/home/kunal/Documents/shadows/ASSIMP_INCLUDE_DIRS  -g   -std=gnu++2a -o CMakeFiles/shadows.dir/Light.cpp.o -c /home/kunal/Documents/shadows/Light.cpp",
+  "file": "/home/kunal/Documents/shadows/Light.cpp"
+}
+]

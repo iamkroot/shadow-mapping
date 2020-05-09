@@ -1,9 +1,10 @@
 #version 330 core
-out vec4 FragColor;
+out vec4 FragColor; // Output fragment color
 
-in vec3 Normal;
-in vec4 FragPos;
+in vec3 Normal; // Normal vector
+in vec4 FragPos; // Input fragment position
 
+// Light class
 struct Light {
     vec3 lightPos;
     vec3 lightColor;
@@ -11,9 +12,11 @@ struct Light {
     sampler2D shadowMap;
     bool enabled;
 };
-uniform int numLights;
-uniform Light lights[4];
 
+uniform int numLights; // number of lights
+uniform Light lights[4]; // Array of the light sources
+
+// Poisson Disk
 vec2 poissonDisk[16] = vec2[](
 vec2(-0.94201624, -0.39906216),
 vec2(0.94558609, -0.76890725),
@@ -33,6 +36,7 @@ vec2(0.19984126, 0.78641367),
 vec2(0.14383161, -0.14100790)
 );
 
+// Method to get the degree of visibility of a fragment
 float getVisibility(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir, sampler2D shadowMap) {
     // perform perspective divide
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;

@@ -3,7 +3,11 @@
 
 #include "common.h"
 
-class Camera {
+/**
+ * @brief Class to represent the Camera
+ */
+class Camera
+{
     GLfloat yaw;
     GLfloat pitch;
     GLfloat initYaw;
@@ -25,8 +29,14 @@ public:
     /**
      * @brief Simple enum to define a direction of movement
      */
-    enum class Direction {
-        FORWARD, BACKWARD, LEFT, RIGHT, UP, DOWN
+    enum class Direction
+    {
+        FORWARD,
+        BACKWARD,
+        LEFT,
+        RIGHT,
+        UP,
+        DOWN
     };
 
     /**

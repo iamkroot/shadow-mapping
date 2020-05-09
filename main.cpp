@@ -6,24 +6,49 @@
 
 Camera camera({10, 10, -5}, {0, 0, 0});
 std::vector<Light> lights = {
-        {{10,  15, 15},  {0, 0, 1}},
-        {{-10, 15, -15}, {1, 0, 0}},
+    {{10, 15, 15}, {0, 0, 1}},
+    {{-10, 15, -15}, {1, 0, 0}},
 };
 
 bool drawMinimaps = true;
 
-void glfw_key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+/** 
+ * @brief Custom callback function for a window
+ * @param window The window to bind the callback to
+ * @param key The key responsible for triggering the callback
+ * @param action The action related to the key triggering the callback
+ */
+void glfw_key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
 
-void glfw_mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
+/**
+ * @brief Custom callback for a window for mouse
+ * @param window Window to which the callback is bound to
+ * @param button Mouse button associated
+ * @param action The action associated with the mouse button
+ */
+void glfw_mouse_button_callback(GLFWwindow *window, int button, int action, int mods);
 
-void glfw_cursor_position_callback(GLFWwindow* window, double xPos, double yPos);
+/**
+ * @brief Callback for changing cursor position
+ * @param window Window to which the callback is bound to
+ * @param xPos x coordinate of the cursor
+ * @param yPos y coordinate of the cursor
+ */
+void glfw_cursor_position_callback(GLFWwindow *window, double xPos, double yPos);
 
-void glfw_scroll_callback(GLFWwindow* window, double xOffset, double yOffset);
+/**
+ * @brief Callback for scrolling
+ * @param window Window to which the callback is bound to
+ * @param xOffset x axis offset
+ * @param yOffset y axis offset
+ */
+void glfw_scroll_callback(GLFWwindow *window, double xOffset, double yOffset);
 
-int main() {
+int main()
+{
     unsigned int windowWidth = 800, windowHeight = 600;
-    float aspect = (float) windowWidth / (float) windowHeight;
-    auto* window = initGLWindow(windowWidth, windowHeight, "shadows");
+    float aspect = (float)windowWidth / (float)windowHeight;
+    auto *window = initGLWindow(windowWidth, windowHeight, "shadows");
 
     glfwSetKeyCallback(window, glfw_key_callback);
     glfwSetMouseButtonCallback(window, glfw_mouse_button_callback);
@@ -49,20 +74,23 @@ int main() {
 
     const unsigned int SHADOW_RES = 1024;
 
-    for (auto &light : lights) {
+    for (auto &light : lights)
+    {
         light.genDepthMap(SHADOW_RES);
     }
 
-    shader.set("numLights", (int) lights.size());
+    shader.set("numLights", (int)lights.size());
 
-    while (!glfwWindowShouldClose(window)) {
+    while (!glfwWindowShouldClose(window))
+    {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
         auto model = glm::mat4(1.0f);
         float near_plane = 1.f, far_plane = 35.f;
 
         // PASS 1: Light view - generate depth maps for each light
-        for (auto &light : lights) {
+        for (auto &light : lights)
+        {
             if (not light.isEnabled)
                 continue;
             auto lightProj = glm::perspective(30.f, aspect, near_plane, far_plane);
@@ -92,11 +120,13 @@ int main() {
         lightShader.set("projection", proj);
         lightShader.set("view", view);
         lightShader.use();
-        for (int i = 0; i < lights.size(); ++i) {
+        for (int i = 0; i < lights.size(); ++i)
+        {
             auto light = lights[i];
             const std::string prefix = "lights[" + std::to_string(i) + "].";
             shader.set(prefix + "enabled", light.isEnabled);
-            if (not light.isEnabled) {
+            if (not light.isEnabled)
+            {
                 continue;
             }
             shader.set(prefix + "lightPos", light.getPosition());
@@ -115,7 +145,8 @@ int main() {
         room.draw();
 
         // Draw minimaps with z-values for each light
-        if (drawMinimaps) {
+        if (drawMinimaps)
+        {
             minimapShader.set("projection", proj);
             minimapShader.set("view", view);
             minimapShader.set("model", model);
@@ -124,7 +155,8 @@ int main() {
             minimapShader.use();
             auto minimapWidth = windowWidth / 4, minimapHeight = windowHeight / 4;
             glEnable(GL_SCISSOR_TEST);
-            for (int i = 0; i < lights.size(); ++i) {
+            for (int i = 0; i < lights.size(); ++i)
+            {
                 if (not lights[i].isEnabled)
                     continue;
                 glViewport(i * minimapWidth, 0, minimapWidth, minimapHeight);
@@ -147,28 +179,50 @@ int main() {
 bool isDragging = false;
 double dragX = -1, dragY = -1;
 
-void glfw_key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    if (key == GLFW_KEY_W and action == GLFW_PRESS) {
+void glfw_key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
+{
+    if (key == GLFW_KEY_W and action == GLFW_PRESS)
+    {
         camera.translate(Camera::Direction::FORWARD);
-    } else if (key == GLFW_KEY_S and action == GLFW_PRESS) {
+    }
+    else if (key == GLFW_KEY_S and action == GLFW_PRESS)
+    {
         camera.translate(Camera::Direction::BACKWARD);
-    } else if (key == GLFW_KEY_A and action == GLFW_PRESS) {
+    }
+    else if (key == GLFW_KEY_A and action == GLFW_PRESS)
+    {
         camera.translate(Camera::Direction::LEFT);
-    } else if (key == GLFW_KEY_D and action == GLFW_PRESS) {
+    }
+    else if (key == GLFW_KEY_D and action == GLFW_PRESS)
+    {
         camera.translate(Camera::Direction::RIGHT);
-    } else if (key == GLFW_KEY_UP and action == GLFW_PRESS) {
+    }
+    else if (key == GLFW_KEY_UP and action == GLFW_PRESS)
+    {
         camera.translate(Camera::Direction::UP);
-    } else if (key == GLFW_KEY_DOWN and action == GLFW_PRESS) {
+    }
+    else if (key == GLFW_KEY_DOWN and action == GLFW_PRESS)
+    {
         camera.translate(Camera::Direction::DOWN);
-    } else if (key == GLFW_KEY_R and action == GLFW_PRESS) {
+    }
+    else if (key == GLFW_KEY_R and action == GLFW_PRESS)
+    {
         camera.reset();
-    } else if (key == GLFW_KEY_Q and action == GLFW_PRESS) {
+    }
+    else if (key == GLFW_KEY_Q and action == GLFW_PRESS)
+    {
         glfwSetWindowShouldClose(window, GL_TRUE);
-    } else if (key == GLFW_KEY_M and action == GLFW_PRESS) {
+    }
+    else if (key == GLFW_KEY_M and action == GLFW_PRESS)
+    {
         drawMinimaps = not drawMinimaps;
-    } else {  // toggle lights using number keys
-        for (int i = 0; i < lights.size(); ++i) {
-            if (key == GLFW_KEY_1 + i and action == GLFW_PRESS) {
+    }
+    else
+    { // toggle lights using number keys
+        for (int i = 0; i < lights.size(); ++i)
+        {
+            if (key == GLFW_KEY_1 + i and action == GLFW_PRESS)
+            {
                 lights[i].isEnabled = not lights[i].isEnabled;
                 break;
             }
@@ -176,16 +230,20 @@ void glfw_key_callback(GLFWwindow* window, int key, int scancode, int action, in
     }
 }
 
-void glfw_mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
-    if (button == GLFW_MOUSE_BUTTON_LEFT) {
+void glfw_mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
+{
+    if (button == GLFW_MOUSE_BUTTON_LEFT)
+    {
         isDragging = action == GLFW_PRESS;
         if (not isDragging)
             dragX = dragY = -1;
     }
 }
 
-void glfw_cursor_position_callback(GLFWwindow* window, double xPos, double yPos) {
-    if (isDragging) {
+void glfw_cursor_position_callback(GLFWwindow *window, double xPos, double yPos)
+{
+    if (isDragging)
+    {
         if (dragX != -1 and dragY != -1)
             camera.rotate(xPos - dragX, yPos - dragY);
         dragX = xPos;
@@ -193,6 +251,7 @@ void glfw_cursor_position_callback(GLFWwindow* window, double xPos, double yPos)
     }
 }
 
-void glfw_scroll_callback(GLFWwindow* window, double xOffset, double yOffset) {
+void glfw_scroll_callback(GLFWwindow *window, double xOffset, double yOffset)
+{
     camera.zoom(yOffset);
 }
