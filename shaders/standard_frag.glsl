@@ -47,12 +47,6 @@ float getVisibility(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir, sampler2
     // we have far = 1, near = 0
     projCoords = projCoords * 0.5 + 0.5;
 
-    // get closest depth value from light's perspective
-    float closestDepth = texture(shadowMap, projCoords.xy).r;
-
-    // get depth of current fragment from light's perspective
-    float currentDepth = projCoords.z;
-
     // declare a bias to deal with shadow acne
     float cosTheta = clamp(dot(normal, lightDir), 0.0, 1.0);
     float bias = clamp(0.0005 * tan(acos(cosTheta)), 0, 0.01);
