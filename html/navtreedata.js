@@ -26,7 +26,17 @@ var NAVTREE =
     [ "Shadow Mapping in OpenGL", "md__r_e_a_d_m_e.html", [
       [ "How to run", "md__r_e_a_d_m_e.html#autotoc_md1", null ],
       [ "Usage", "md__r_e_a_d_m_e.html#autotoc_md2", null ],
-      [ "References", "md__r_e_a_d_m_e.html#autotoc_md3", null ]
+      [ "Algorithm Discussion", "md__r_e_a_d_m_e.html#autotoc_md3", [
+        [ "Creating the shadow map", "md__r_e_a_d_m_e.html#autotoc_md4", null ],
+        [ "Shading the scene", "md__r_e_a_d_m_e.html#autotoc_md5", null ],
+        [ "Challenges", "md__r_e_a_d_m_e.html#autotoc_md6", [
+          [ "Shadow acne, aka self-shadowing", "md__r_e_a_d_m_e.html#autotoc_md7", null ],
+          [ "Peter panning", "md__r_e_a_d_m_e.html#autotoc_md8", null ],
+          [ "Aliasing", "md__r_e_a_d_m_e.html#autotoc_md9", null ]
+        ] ],
+        [ "Results", "md__r_e_a_d_m_e.html#autotoc_md10", null ]
+      ] ],
+      [ "References", "md__r_e_a_d_m_e.html#autotoc_md11", null ]
     ] ],
     [ "Classes", "annotated.html", [
       [ "Class List", "annotated.html", "annotated_dup" ],

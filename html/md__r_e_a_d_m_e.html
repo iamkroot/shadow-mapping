@@ -85,7 +85,7 @@ $(document).ready(function(){initNavTree('md__r_e_a_d_m_e.html',''); initResizab
 <div class="title">Shadow Mapping in OpenGL </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>An OpenGL C++ implementation of basic shadow mapping using a depth buffer. </p><center><img src="assets/scene_screenshot.png" alt="Image" class="inline"/></center><p>Implements a two pass rendering algorithm, as described in "Casting Curved Shadows on Curved Surfaces" by Lance Williams, 1978.</p>
+<div class="textblock"><p>An OpenGL C++ implementation of basic shadow mapping using a depth buffer. </p><center><img src="assets/scene_color.png" alt="Image" class="inline"/></center><p>Implements a two pass rendering algorithm, as described in "Casting Curved Shadows on Curved Surfaces" by Lance Williams, 1978.</p>
 <h1><a class="anchor" id="autotoc_md1"></a>
 How to run</h1>
 <ul>
@@ -109,10 +109,39 @@ Usage</h1>
 <li>Scroll mouse to zoom</li>
 <li>Press <code>r</code> to reset the camera</li>
 <li><code>q</code> to quit</li>
-<li><code>m</code> to toggle depth minimap</li>
+<li><code>m</code> to toggle depth minimap(s)</li>
 <li>Use <code>1</code>..<code>9</code> to toggle the corresponding light</li>
 </ul>
 <h1><a class="anchor" id="autotoc_md3"></a>
+Algorithm Discussion</h1>
+<p>There are two main steps involved in the algorithm. First step, involves creating the shadow map, which takes one pass for each light source. The second step is actually shading and rendering the scene according to the saved shadow maps.</p>
+<h2><a class="anchor" id="autotoc_md4"></a>
+Creating the shadow map</h2>
+<p>Consider a single light source in the scene. We create the rendering of the scene from the point of view of this light source. This scene is stored in a depth buffer/depth map as a texture, often called a shadow map, which contains all the visible points for this light. This step can be easily repeated for other light sources in the scene as well, creating separate shadow maps for each light. <br  />
+</p>
+<h2><a class="anchor" id="autotoc_md5"></a>
+Shading the scene</h2>
+<p>In the second step, the scene is rendered normally from the point of view of the camera. While doing this, each coordinate in the camera space representing a pixel in the rendered scene is transformed into the light space coordinate system. The resulting z coordinate (after perspective division) is then checked against the previously computed depth buffer value at this xy coordinate to determine if this point lies in the light or in shadow.</p>
+<h2><a class="anchor" id="autotoc_md6"></a>
+Challenges</h2>
+<h3><a class="anchor" id="autotoc_md7"></a>
+Shadow acne, aka self-shadowing</h3>
+<p>Following the original algorithm outlined in the paper, the results were as shown below. </p><center><img src="assets/acne.png" alt="Acne" class="inline"/></center><p>Distinct patterns are visible on the surfaces, as an instance of the well known <a href="https://en.wikipedia.org/wiki/Moir%C3%A9_pattern">Moiré pattern</a> phenomenon. In theory, the map stores the distance to the closest object from the light; however, due to finite nature of raster graphics, it stores the distances in discrete values. The rendered surfaces are not actually continuous, but rather have jagged texture, with some rows of pixels raised above their neighbours. This causes the surface to shadow <em>itself</em>, since the rows of raised pixels cast a small shadow onto their neighbours, forming bands as seen above.</p>
+<p><b>Solution:</b> By understanding that the acne occurs at the surfaces facing towards the light, we can mitigate shadow acne by inserting a small bias value in the depth map comparision calculation. This shifts the perceived depth of all pixels <em>below</em> the surface (away from the light), and the "raised" pixels cannot cast shadows anymore.</p>
+<h3><a class="anchor" id="autotoc_md8"></a>
+Peter panning</h3>
+<p>Adding a bias causes another problem, as shown below. </p><center><img src="assets/peter_panning.png" alt="Peter Panning" class="inline"/></center><p>The objects look as if they are "hovering" above the ground, since we shifted the depths away from the light. This is called the "Peter Pan Effect", named after the character who was separated from his shadow. To remedy this, we have to make sure that the bias we use is small enough to not be noticeable. However, using a constant bias value in this case proves to be inadequate for removing acne on curved surfaces where some pixels may still become raised above the surface.</p>
+<p><b>Solution:</b> The solution to both these problems is to use a small, but varying bias value dependent on the angle between the normals to the surface and the light direction.</p>
+<h3><a class="anchor" id="autotoc_md9"></a>
+Aliasing</h3>
+<p>Looking closely at the edges of the shadows, we see another problem. </p><center><img src="assets/aliasing.png" alt="Peter Panning" class="inline"/></center><p>The shadow edges are extremely jagged, as a consequence of the limited resolution of the depth map we use in the first pass.</p>
+<p><b>Solution:</b> There is a rich literature on solving this problem, and here we have implemented Poisson Sampling to reduce aliasing. In the second pass, instead of sampling the depth map only once for each pixel, it's neighbouring pixels in a small circular disc are also sampled. Their depth values also factor into the final visibility value of the pixel, thus allowing for a smooth output.</p>
+<h2><a class="anchor" id="autotoc_md10"></a>
+Results</h2>
+<p>The final output is shown below </p><center><img src="assets/scene_screenshot.png" alt="Peter Panning" class="inline"/></center><ul>
+<li>We have added support for multiple lights, to allow for more interesting scenarios</li>
+</ul>
+<h1><a class="anchor" id="autotoc_md11"></a>
 References</h1>
 <ol type="1">
 <li><a href="https://dl.acm.org/doi/10.1145/280811.280975">Casting Curved Shadows on Curved Surfaces</a>, Williams, 1978</li>
